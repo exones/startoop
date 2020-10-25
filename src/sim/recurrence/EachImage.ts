@@ -1,19 +1,20 @@
 
-import { Moment } from 'moment';
-import { Each } from './Each';
-import { IRecurrence } from './IRecurrence';
-import { IRecurrenceImage } from './IRecurrenceImage';
+import { Moment } from "moment";
+import { Offset } from '../time/Offset';
+import { Period } from "../time/Period";
+import { Each } from "./Each";
+import { IRecurrence } from "./IRecurrence";
+import { IRecurrenceImage } from "./IRecurrenceImage";
+import { RecurrenceImage } from './RecurrenceImage';
 
 
-export class EachImage implements IRecurrenceImage {
-    readonly amount: number;
-    readonly unit: moment.unitOfTime.Base;
-    readonly times: number;
+export class EachImage implements RecurrenceImage<Each> {
+    readonly period: Period;
+    readonly at: Offset;
 
-    constructor(amount: number, unit: moment.unitOfTime.Base, times: number = -1) {
-        this.amount = amount;
-        this.unit = unit;
-        this.times = times;
+    constructor(period: Period, at: Offset) {
+        this.period = period;
+        this.at = at;
     }
 
     start(date: Moment): Each {

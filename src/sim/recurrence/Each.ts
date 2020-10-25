@@ -1,28 +1,33 @@
 import { Moment } from "moment";
+import { MomentUtils } from '../time/MomentUtils';
 import { EachImage } from "./EachImage";
 import { IRecurrence } from "./IRecurrence";
 import { Recurrence } from "./Recurrence";
 import { RecurrenceIterator } from "./RecurrenceIterator";
+import { RecurrenceNextResult } from './RecurrenceNextResult';
 
 class EachIterator extends RecurrenceIterator<EachImage> {
     currentDate: Moment;
     timesExecuted: number;
-    done: boolean;
+    private isDone: boolean;
+
+    done(): void {
+        this.isDone = true;
+    }
 
     constructor(startDate: Moment, image: EachImage) {
         super(startDate, image);
         this.currentDate = startDate;
-        this.done = false;
+        this.isDone = false;
         this.timesExecuted = 0;
     }
 
     next(): IteratorResult<Moment> {
-        let newDate: Moment = this.startDate.add(this.image.amount, this.image.unit);
-        this.done = this.timesExecuted < this.image.times;
+        let newDate: Moment = this.startDate.add(this.image.period.amount, this.image.period.unit);
 
         let result : IteratorResult<Moment> = <IteratorReturnResult<Moment>>{
-            done: this.done,
-            value: this.done ? undefined : newDate
+            done: this.isDone,
+            value: this.isDone ? undefined : newDate
         };
 
         this.timesExecuted++;
@@ -32,7 +37,26 @@ class EachIterator extends RecurrenceIterator<EachImage> {
 }
 
 export class Each extends Recurrence<EachImage> {
-    [Symbol.iterator](): Iterator<Moment, any, undefined> {
-        return new EachIterator(this.startDate, this.image);
+
+    private first: boolean = true;
+
+    protected start(): void {
+        this.date = MomentUtils.offsetToDate(this.image.at, this.startDate);
+    }
+
+    next(): RecurrenceNextResult {
+
+        if (this.first) {
+            this.first = false;
+        } else {
+            this.date = this.date?.add(this.image.period.amount, this.image.period.unit);
+        }
+
+        let result : RecurrenceNextResult = {
+            done: this.done,
+            date: this.done ? undefined : this.date
+        };
+
+        return result;
     }
 }

@@ -1,15 +1,16 @@
+import { Offset } from '../time/Offset';
+import { Period } from '../time/Period';
 import { EachImage } from './EachImage';
-import { EachImageBuilder } from './EachImageBuilder';
 import { OnceImage } from "./OnceImage";
 
 export class Recurrences {
-    private static readonly ONCE = new OnceImage();
+    private static readonly ONCE = new OnceImage(Period.of(0, "days"));
 
     static once(): OnceImage {
         return Recurrences.ONCE;
     }
 
-    static each(amount: number, unit: moment.unitOfTime.Base): EachImage {
-        return new EachImage(amount, unit);
+    static each(period: Period, at: Offset = Period.ZERO): EachImage {
+        return new EachImage(period, at);
     }
 }

@@ -1,14 +1,16 @@
 import { EarnEvent } from './EarnEvent';
-import { Events } from './Events';
+import { Events } from './event/Events';
 import { System } from "./System";
+import "@/sim/time/PeriodExtensions";
+import { Period } from './time/Period';
 
 let sys: System = new System("test");
 
 let salary = sys
     .eventStream("salary")
-    .from("2020-12-12")
+    .from(Period.of(1, "month"))
     // .for(3, "years")
-    .each(1).day()
+    .each((1).day())
     .emit(Events.earn(1000));
 
 // let x = EarnEvent.NAME;

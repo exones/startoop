@@ -1,29 +1,23 @@
 import { Moment } from "moment";
+import { MomentUtils } from '../time/MomentUtils';
 import { IRecurrence } from './IRecurrence';
 import { OnceImage } from './OnceImage';
 import { Recurrence } from './Recurrence';
+import { RecurrenceNextResult } from './RecurrenceNextResult';
 
-class OnceIterator implements Iterator<Moment> {
-    readonly date: Moment;
-    private done: boolean = false;
-
-    constructor(date: Moment) {
-        this.date = date;
+export class Once extends Recurrence<OnceImage> {
+    protected start(): void {
+        this.date = MomentUtils.offsetToDate(this.image.at, this.startDate);
     }
-    next(): IteratorResult<Moment> {
-        let result : IteratorResult<Moment> = <IteratorReturnResult<Moment>>{
+
+    next(): RecurrenceNextResult {
+        let result : RecurrenceNextResult = {
             done: this.done,
-            value: this.done ? undefined : this.date
+            date: this.done ? undefined : this.date
         };
         this.done = true;
 
         return result;
-    }
-}
-
-export class Once extends Recurrence<OnceImage> {
-    [Symbol.iterator](): Iterator<Moment> {
-        return new OnceIterator(this.startDate);
     }
 }
 
