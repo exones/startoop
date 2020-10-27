@@ -17,6 +17,6 @@ export class Event<TData extends EventData> extends SystemEntity {
     }
 
     shortString(): string {
-        return "${data.shortString()} at ${this.dateString()}";
+        return `${this.data.shortString()} at ${this.dateString()}`;
     }
 }

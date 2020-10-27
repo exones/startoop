@@ -1,3 +1,5 @@
+import { Logger } from 'tslog';
+import { newLogger } from './log/LogRoot';
 import { INamed } from "./Named";
 
 export abstract class SystemEntity implements INamed {
@@ -13,9 +15,5 @@ export abstract class SystemEntity implements INamed {
 
     toString(): string{
         return `${this.shortString} ${JSON.stringify(this)}`;
-    }
-
-    log(): void {
-        console.log(this.toString());
     }
 }

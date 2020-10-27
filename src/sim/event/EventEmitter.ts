@@ -1,3 +1,3 @@
 import { EventData } from './EventData';
 
-export type EventEmitter<T extends EventData> = () => T | (new (...args: []) => T);
+export type EventEmitter<T extends EventData> = () => T;

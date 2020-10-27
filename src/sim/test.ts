@@ -1,10 +1,10 @@
 import { EarnEvent } from './EarnEvent';
 import { Events } from './event/Events';
-import { System } from "./System";
+import { SystemImage } from "./System";
 import "@/sim/time/PeriodExtensions";
 import { Period } from './time/Period';
 
-let sys: System = new System("test");
+let sys: SystemImage = new SystemImage("test");
 
 let salary = sys
     .eventStream("salary")

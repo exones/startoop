@@ -8,6 +8,6 @@ export abstract class EventData extends SystemEntity {
     }
 
     shortString(): string {
-        return "${this.name}";
+        return `${this.name}`;
     }
 }

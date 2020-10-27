@@ -19,7 +19,8 @@ describe("EventStreamImage", () => {
             expect(sut.name).toBe("aName");
             expect(sut.startAt).toEqual(Period.of(0, "days"));
             expect(sut.endAt).toEqual(undefined);
-            expect(sut.emitter).toEqual(undefined);
+            expect(sut.emitter).toBeDefined();
+            expect(sut.emitter()).toEqual({});
             expect(sut.recurrence).toBeDefined();
             expect(sut.recurrence).toBeInstanceOf(OnceImage);
         });

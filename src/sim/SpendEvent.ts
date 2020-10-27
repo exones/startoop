@@ -9,6 +9,6 @@ export class SpendEvent extends PositiveAmountEvent {
     }
 
     shortString(): string {
-        return `Spend %{amount}`;
+        return `Spend ${this.amount}`;
     }
 }
