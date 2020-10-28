@@ -23,7 +23,7 @@ class EachIterator extends RecurrenceIterator<EachImage> {
     }
 
     next(): IteratorResult<Moment> {
-        let newDate: Moment = this.startDate.add(this.image.period.amount, this.image.period.unit);
+        let newDate: Moment = this.startDate.clone().add(this.image.period.amount, this.image.period.unit);
 
         let result : IteratorResult<Moment> = <IteratorReturnResult<Moment>>{
             done: this.isDone,
@@ -41,7 +41,7 @@ export class Each extends Recurrence<EachImage> {
     private first: boolean = true;
 
     protected start(): void {
-        this.date = MomentUtils.offsetToDate(this.image.at, this.startDate);
+        this.date = MomentUtils.offsetInputToDate(this.image.at, this.startDate);
     }
 
     next(): RecurrenceNextResult {
@@ -49,7 +49,7 @@ export class Each extends Recurrence<EachImage> {
         if (this.first) {
             this.first = false;
         } else {
-            this.date = this.date?.add(this.image.period.amount, this.image.period.unit);
+            this.date = this.date?.clone().add(this.image.period.amount, this.image.period.unit);
         }
 
         let result : RecurrenceNextResult = {

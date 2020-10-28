@@ -1,36 +1,51 @@
+import { EventList } from "@/sim/engine/EventList";
+import { Event } from '@/sim/event/Event';
+import { Events } from '@/sim/event/Events';
 import { MomentUtils } from '@/sim/time/MomentUtils';
 import { Moment } from 'moment';
-import { PriorityQueue } from "typescript-collections";
+import { PriorityQueue, Queue } from "typescript-collections";
 import { isUndefined } from 'typescript-collections/dist/lib/util';
 
 interface Tup{
     key: Moment;
-    value: string;
+    value: Queue<string>;
 }
 
 describe("smth", () => {
     it("must",  () => {
-        const pq = new PriorityQueue<Tup>((a, b) => {
-            if (a.key.isSame(b.key)) {
+        const pq = new PriorityQueue<EventList>((a, b) => {
+            if (a.date.isSame(b.date)) {
                 return 0;
             }
-            if (a.key.isAfter(b.key)) {
+            if (a.date.isAfter(b.date)) {
                 return -1;
             } else {
                 return 1;
             }
         });
 
-        pq.enqueue({ key: MomentUtils.of("2020-01-09"), value: "Maden" });
-        pq.enqueue({ key: MomentUtils.of("2020-01-07"), value: "John" });
-        pq.enqueue({ key: MomentUtils.of("2020-01-01"), value: "Sally" });
-        pq.enqueue({ key: MomentUtils.of("2020-01-02"), value: "MoreJohn" });
 
-        let res: Tup | undefined = undefined;
+        const a = new EventList(MomentUtils.of("2020-01-09"));
+        const b = new EventList(MomentUtils.of("2020-01-07"));
+        const c = new EventList(MomentUtils.of("2020-01-01"));
+        const d = new EventList(MomentUtils.of("2020-01-02"));
+
+        a.enqueue(new Event(a.date, Events.spend(9)()));
+        b.enqueue(new Event(b.date, Events.spend(7)()));
+        c.enqueue(new Event(c.date, Events.spend(1)()));
+        d.enqueue(new Event(d.date, Events.spend(2)()));
+
+
+        pq.enqueue(a);
+        pq.enqueue(b);
+        pq.enqueue(c);
+        pq.enqueue(d);
+
+        let res: EventList | undefined = undefined;
 
         do {
             res = pq.dequeue();
-            console.log(res);
+            console.log(res?.dequeue());
         }while (!isUndefined(res));
         
     });

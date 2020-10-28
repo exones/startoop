@@ -1,14 +1,15 @@
-import { Logger } from 'tslog';
-import { EventData } from '../event/EventData';
-import { LogRoot, newLogger } from '../log/LogRoot';
-import { SystemEntity } from '../SystemEntity';
-import { SensorEventReaction } from './SensorEventReaction';
-import { SensorInitializer } from './SensorInitializer';
+import { Logger } from "tslog";
+import { Dictionary } from "typescript-collections";
+import { EventData } from "../event/EventData";
+import { LogRoot, newLogger } from "../log/LogRoot";
+import { SystemEntity } from "../SystemEntity";
+import { SensorEventReaction } from "./SensorEventReaction";
+import { SensorInitializer } from "./SensorInitializer";
 
 export class SensorImage<TData> extends SystemEntity {
     private readonly log : Logger = newLogger();
     initalizer: SensorInitializer<TData> = () => { return <TData>{}; };
-    reactions: { [key: string]: SensorEventReaction<any, TData> } = {};
+    reactions: Dictionary<string, SensorEventReaction<any, TData>> = new Dictionary<string, SensorEventReaction<any, TData>>();
 
     constructor(name: string) {
         super(name);
@@ -22,11 +23,11 @@ export class SensorImage<TData> extends SystemEntity {
 
     on<TEventData extends EventData>(cls: Function, reaction: SensorEventReaction<TEventData, TData>): SensorImage<TData> {
         const eventName : string = cls.name;
-        if (this.reactions[eventName]) {
+        if (this.reactions.containsKey(eventName)) {
             this.log.warn(`Reaction for event '${eventName}' is already set in sensor '${this.name}'.`);
 
         }
-        this.reactions[eventName] = reaction;
+        this.reactions.setValue(eventName, reaction);
 
         return this;
     }

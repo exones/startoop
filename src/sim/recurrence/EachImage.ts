@@ -1,6 +1,7 @@
 
 import { Moment } from "moment";
 import { Offset } from '../time/Offset';
+import { OffsetInput } from '../time/OffsetInput';
 import { Period } from "../time/Period";
 import { Each } from "./Each";
 import { IRecurrence } from "./IRecurrence";
@@ -10,9 +11,9 @@ import { RecurrenceImage } from './RecurrenceImage';
 
 export class EachImage implements RecurrenceImage<Each> {
     readonly period: Period;
-    readonly at: Offset;
+    readonly at: OffsetInput;
 
-    constructor(period: Period, at: Offset) {
+    constructor(period: Period, at: OffsetInput) {
         this.period = period;
         this.at = at;
     }

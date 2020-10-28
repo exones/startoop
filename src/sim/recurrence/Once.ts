@@ -7,7 +7,7 @@ import { RecurrenceNextResult } from './RecurrenceNextResult';
 
 export class Once extends Recurrence<OnceImage> {
     protected start(): void {
-        this.date = MomentUtils.offsetToDate(this.image.at, this.startDate);
+        this.date = MomentUtils.offsetInputToDate(this.image.at, this.startDate);
     }
 
     next(): RecurrenceNextResult {

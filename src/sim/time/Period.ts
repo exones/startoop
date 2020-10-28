@@ -17,7 +17,7 @@ export class Period {
     }
 
     from(moment: Moment): Moment {
-        return moment.add(this.amount, this.unit);
+        return moment.clone().add(this.amount, this.unit);
     }
 }
 

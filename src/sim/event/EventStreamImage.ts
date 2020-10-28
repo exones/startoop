@@ -9,6 +9,7 @@ import { Offset } from '../time/Offset';
 import { MomentUtils } from '../time/MomentUtils';
 import { isPeriod, Period } from "../time/Period";
 import { isString } from "../util/StringUtils";
+import { OffsetInput } from '../time/OffsetInput';
 
 export class EventStreamImage extends SystemEntity {
     recurrence: IRecurrenceImage = Recurrences.once();
@@ -16,7 +17,7 @@ export class EventStreamImage extends SystemEntity {
     endAt: Period | Moment | undefined = undefined;
     emitter: EventEmitter<any> = () => { return <any>{}; };
 
-    from(date: Offset): EventStreamImage {
+    from(date: OffsetInput): EventStreamImage {
 
         if (isPeriod(date)) {
             this.startAt = date;
@@ -27,7 +28,7 @@ export class EventStreamImage extends SystemEntity {
         return this;
     }
 
-    until(date: Offset | undefined): EventStreamImage {
+    until(date: OffsetInput | undefined): EventStreamImage {
         if (date === undefined) {
             this.endAt = undefined;
         } else if (isPeriod(date)) {
