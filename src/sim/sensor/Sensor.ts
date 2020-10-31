@@ -20,7 +20,7 @@ export class Sensor<TData> extends SystemEntity {
         this.image = image;
         this.startDate = startDate;
 
-        const initialData = this.image.initalizer();
+        const initialData: TData = this.image.initalizer();
         this.timeSeries = new SensorTimeSeries<TData>(startDate, initialData);
     }
 
@@ -30,6 +30,8 @@ export class Sensor<TData> extends SystemEntity {
 
         if (isUndefined(newData)) { // no reaction for this event
             this.log.warn(`Sensor ${this.name} doesn't have reaction for ${evt.name}.`);
+        } else {
+            // TODO: set data in timeseries
         }
 
         return newData;

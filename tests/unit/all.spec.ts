@@ -4,6 +4,7 @@ import { SimulationParameters } from "@/sim/engine/SimulationParameters";
 import { SimulationResult } from "@/sim/engine/SimulationResult";
 import { Events } from "@/sim/event/Events";
 import { EventStreamImage } from "@/sim/event/EventStreamImage";
+import { newLogger } from '@/sim/log/LogRoot';
 import { SpendEvent } from "@/sim/SpendEvent";
 import { SystemImage } from "@/sim/System";
 import "@/sim/time/PeriodExtensions";
@@ -13,12 +14,13 @@ interface AmountData {
 }
 
 describe("system", () => {
+    const log = newLogger();
     it("try", () => {
         var sys = new SystemImage("test");
 
         const salary : EventStreamImage = sys
             .eventStream("salary")
-            .from((5).month())
+            .from((1).month())
             .each((2).month())
             .emit(Events.spend(1000));
             // .then().after((1).year)
@@ -31,7 +33,11 @@ describe("system", () => {
                 return { ...data, amount: data.amount + evt.data.amount };
             })
             .on<SpendEvent>(SpendEvent, (sys, evt, data) => {
-                return { ...data, amount: data.amount - evt.data.amount };
+                const newData = { ...data, amount: data.amount - evt.data.amount };
+
+                log.debug(`New balance: ${newData.amount}`);
+
+                return newData;
             });
 
         sys

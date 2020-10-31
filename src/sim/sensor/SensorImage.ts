@@ -24,7 +24,7 @@ export class SensorImage<TData> extends SystemEntity {
     on<TEventData extends EventData>(cls: Function, reaction: SensorEventReaction<TEventData, TData>): SensorImage<TData> {
         const eventName : string = cls.name;
         if (this.reactions.containsKey(eventName)) {
-            this.log.warn(`Reaction for event '${eventName}' is already set in sensor '${this.name}'.`);
+            this.log.warn(`Reaction for event '${eventName}' is already set for sensor '${this.name}'.`);
 
         }
         this.reactions.setValue(eventName, reaction);
