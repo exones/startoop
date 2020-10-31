@@ -48,6 +48,7 @@ export class Timeline {
 
     scheduleEvent(evt: AnyEvent): void {
         if (evt.date.isAfter(this.endDate)) { // we don't schedule events after simulation end
+            this.log.debug(`Discarding event '${evt.name}' at ${MomentUtils.toIsoString(evt.date)} is it's after end date (${MomentUtils.toIsoString(this.endDate)}).`);
             return;
         }
 

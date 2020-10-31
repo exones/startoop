@@ -1,12 +1,12 @@
-import { Moment } from 'moment';
-import { Logger } from 'tslog';
-import { isUndefined } from 'typescript-collections/dist/lib/util';
-import { AnyEvent } from '../event/AnyEvent';
-import { newLogger } from '../log/LogRoot';
-import { SystemImage } from '../System';
-import { SystemEntity } from '../SystemEntity';
-import { SensorImage } from './SensorImage';
-import { SensorTimeSeries } from './SensorTimeSeries';
+import { Moment } from "moment";
+import { Logger } from "tslog";
+import { isUndefined } from "typescript-collections/dist/lib/util";
+import { AnyEvent } from "../event/AnyEvent";
+import { newLogger } from "../log/LogRoot";
+import { SystemImage } from "../System";
+import { SystemEntity } from "../SystemEntity";
+import { SensorImage } from "./SensorImage";
+import { SensorTimeSeries } from "./SensorTimeSeries";
 
 export class Sensor<TData> extends SystemEntity {
     private readonly log: Logger = newLogger();
@@ -31,7 +31,8 @@ export class Sensor<TData> extends SystemEntity {
         if (isUndefined(newData)) { // no reaction for this event
             this.log.warn(`Sensor ${this.name} doesn't have reaction for ${evt.name}.`);
         } else {
-            // TODO: set data in timeseries
+            this.log.debug(`Sensor ${this.name} reacted on ${evt.name} at ${evt.date} to produce from ${JSON.stringify(oldData)} -> ${JSON.stringify(newData)}.`);
+            this.timeSeries.setData(evt.date, newData);
         }
 
         return newData;
