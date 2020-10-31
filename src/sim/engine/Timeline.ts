@@ -14,8 +14,9 @@ export class Timeline {
     private readonly queue: PriorityQueue<EventList>;
     private readonly scheduledEvents: Dictionary<Moment, EventList>;
     private now: Moment;
+    private endDate: Moment;
 
-    constructor(startDate: Moment) {
+    constructor(startDate: Moment, endDate: Moment) {
         this.startDate = startDate;
         this.queue = new PriorityQueue<EventList>((a, b) => {
             this.log.debug(`Matching ${a.date} and ${b.date}: ${a === b}, ${a.events.size() === b.events.size()}`);
@@ -31,29 +32,43 @@ export class Timeline {
 
         this.scheduledEvents = new Dictionary<Moment, EventList>(m => MomentUtils.toIsoString(m));
         this.now = startDate;
+        this.endDate = endDate;
     }
 
     getEventsForNow(): EventList {
         const res: EventList | undefined = this.scheduledEvents.getValue(this.now);
+        const fromQueue: EventList | undefined = this.queue.peek();
 
-        if (isUndefined(res)) {
+        if (isUndefined(res)) { // no date defined
             return new EventList(this.now);
+        } else {
+            if (fromQueue !== res) {
+                this.log.error(`From: ${fromQueue?.date} vs ${res?.date}.`)
+                throw new Error("Mismatch from scheduledEvents and queue.");
+            }
         }
 
         return res;
     }
 
     scheduleEvent(evt: AnyEvent): void {
-        let eventsList = this.scheduledEvents.getValue(evt.date);
+        if (evt.date.isAfter(this.endDate)) { // we don't schedule events after simulation end
+            return;
+        }
+
+        let eventsList : EventList | undefined = this.scheduledEvents.getValue(evt.date);
 
         if (isUndefined(eventsList)) { // no events for this date yet
             const newList: EventList = new EventList(evt.date);
+            this.log.debug(`Enqueuing new date ${evt.date}`);
             this.queue.enqueue(newList);
-            newList.enqueue(evt);
-            this.log.debug(`Enqueue ${newList.date}`);
+
+            this.log.debug(`Now queue has size of ${this.queue.size()}.`);
+
             eventsList = newList;
         }
 
+        this.log.debug(`Enqueuing new event ${evt.date}: ${evt}`);
         eventsList.enqueue(evt); // add event to the end of the date's queue
     }
 
@@ -65,21 +80,38 @@ export class Timeline {
         return this.now;
     }
 
+    advance(): boolean {
+        const eventsForNow : EventList = this.getEventsForNow();
+
+        if (eventsForNow.size() > 0) {
+            throw new Error(`There are still some unprocessed events for ${this.now}.`);
+        }
+
+        this.queue.dequeue(); // remove current empty list
+        const nextEventsList : EventList | undefined = this.queue.peek();
+
+        if (isUndefined(nextEventsList)) {
+            this.log.debug("Nowhere to advance: queue is empty.");
+            return false; // queue finished
+        }
+
+        this.now = nextEventsList.date;
+        this.log.debug(`Advanced to ${this.now}.`);
+
+        return true;
+    }
+
     getNextEvent(): AnyEvent | undefined {
         const evList = this.queue.peek();
 
-        // this.log.debug(`evList: ${JSON.stringify(evList)}`);
         if (isUndefined(evList)) { // empty queue: no events left
             return undefined;
         }
 
-        const event = evList.dequeue();
-        this.log.debug(`Dequeue event: ${event?.shortString()}`);
-        // this.log.debug(`evList: ${JSON.stringify(evList)}`);
+        const event : AnyEvent | undefined = evList.dequeue();
 
         if (isUndefined(event)) { // no events in the head element
             this.queue.dequeue(); // dequeue empty head element
-            // this.log.debug(`New queue length: ${this.queue.size()}`);
 
             return this.getNextEvent();
         }

@@ -1,3 +1,3 @@
-import { Sensor } from './Sensor';
+import { Sensor } from "./Sensor";
 
 export type AnySensor = Sensor<any>;

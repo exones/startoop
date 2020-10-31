@@ -1,11 +1,11 @@
-import { EarnEvent } from '@/sim/EarnEvent';
-import { Engine } from '@/sim/engine/Engine';
-import { SimulationParameters } from '@/sim/engine/SimulationParameters';
-import { Events } from '@/sim/event/Events';
-import { LogRoot } from '@/sim/log/LogRoot';
-import { SpendEvent } from '@/sim/SpendEvent';
+import { EarnEvent } from "@/sim/EarnEvent";
+import { Engine } from "@/sim/engine/Engine";
+import { SimulationParameters } from "@/sim/engine/SimulationParameters";
+import { SimulationResult } from '@/sim/engine/SimulationResult';
+import { Events } from "@/sim/event/Events";
+import { EventStreamImage } from "@/sim/event/EventStreamImage";
+import { SpendEvent } from "@/sim/SpendEvent";
 import { SystemImage } from "@/sim/System";
-import { MomentUtils } from '@/sim/time/MomentUtils';
 import "@/sim/time/PeriodExtensions";
 
 interface AmountData {
@@ -16,32 +16,13 @@ describe("system", () => {
     it("try", () => {
         var sys = new SystemImage("test");
 
-        const salary = sys
+        const salary : EventStreamImage = sys
             .eventStream("salary")
             .from((1).month())
             .each((1).month())
             .emit(Events.spend(1000));
             // .then().after((1).year)
             // .emit(Events.spend(2000));
-
-        // sys
-        //     .sensor("positive")
-        //     .init(data => {
-        //         data.curr = 0;
-        //     })
-        //     .on<EarnEvent>(EarnEvent, (evt, data) => {
-        //         data.curr = data.curr + evt.amount;
-        //     });
-
-        // sys
-        //     .sensor("negative")
-        //     .init(data => {
-        //         data.curr = 0;
-        //     })
-        //     .on(EarnEvent)
-        //     .update((evt, data) => {
-        //         data.curr = data.curr + evt.amount;
-        //     });
 
         sys
             .sensor<AmountData>("balance")
@@ -67,13 +48,14 @@ describe("system", () => {
                 return { ...data, amount: data.amount + evt.data.amount };
             });
 
-        const engine = new Engine();
+        const engine : Engine = new Engine();
 
-        const simParams = <SimulationParameters>{
+        const simParams : SimulationParameters = {
             startDate: "2021-01-01",
-            endDate: "2025-01-01"
-        }
-        const result = engine.simulate(sys, simParams);
+            endDate: "2021-06-01"
+        };
+
+        const result : SimulationResult = engine.simulate(sys, simParams);
 
         console.log(result);
     });

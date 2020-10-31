@@ -15,7 +15,7 @@ export class EventStreamImage extends SystemEntity {
     recurrence: IRecurrenceImage = Recurrences.once();
     startAt: Period | Moment = Period.of(0, "days");
     endAt: Period | Moment | undefined = undefined;
-    emitter: EventEmitter<any> = () => { return <any>{}; };
+    emitter: EventEmitter<EventData> = () => { return <EventData>{}; };
 
     from(date: OffsetInput): EventStreamImage {
 

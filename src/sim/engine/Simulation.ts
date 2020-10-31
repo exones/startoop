@@ -2,7 +2,6 @@ import { Moment, now } from "moment";
 import { Logger } from "tslog";
 import { isUndefined } from "typescript-collections/dist/lib/util";
 import { Event } from "../event/Event";
-import { AnyEvent } from "../event/AnyEvent";
 import { EventStream } from "../event/EventStream";
 import { newLogger } from "../log/LogRoot";
 import { Sensor } from "../sensor/Sensor";
@@ -13,8 +12,15 @@ import { SimulationResult } from "./SimulationResult";
 import { Timeline } from "./Timeline";
 import { AnySensor } from "../sensor/AnySensor";
 import { StringDictionary } from "../util/StringDictionary";
-import { ValueEventData } from '../event/ValueEventData';
-import { SpendEvent } from '../SpendEvent';
+import { EventList } from "./EventList";
+import { AnyEvent } from "../event/AnyEvent";
+import { EventStreamImage } from '../event/EventStreamImage';
+import { SensorImage } from '../sensor/SensorImage';
+import { AnySensorImage } from '../sensor/AnySensorImage';
+import { RecurrenceNextResult } from '../recurrence/RecurrenceNextResult';
+import { EventData } from '../event/EventData';
+import { Recurrence } from '../recurrence/Recurrence';
+import { IRecurrence } from '../recurrence/IRecurrence';
 
 interface ActualSimulationParameters {
     startDate: Moment;
@@ -22,7 +28,7 @@ interface ActualSimulationParameters {
 }
 
 export class Simulation {
-    private readonly log : Logger = newLogger();
+    private readonly log: Logger = newLogger();
 
     private readonly params: ActualSimulationParameters;
     private readonly system: SystemImage;
@@ -31,6 +37,7 @@ export class Simulation {
     private sensorsByEvent: StringDictionary<Array<AnySensor>>;
     private currentDate: Moment = MomentUtils.now();
     private timeline: Timeline;
+    private first: boolean = true;
 
     constructor(system: SystemImage, params: SimulationParameters) {
         this.system = system;
@@ -38,21 +45,26 @@ export class Simulation {
             startDate: MomentUtils.of(params.startDate),
             endDate: MomentUtils.of(params.endDate)
         };
-        this.timeline = new Timeline(this.params.startDate);
+        this.timeline = new Timeline(this.params.startDate, this.params.endDate);
         this.sensorsByEvent = new StringDictionary<Array<AnySensor>>();
     }
 
     private step(): boolean {
-        if (this.timeline.hasFinished()) {
-            return false;
+        if (this.first) {
+            this.first = false
+        } else {
+            if (this.timeline.hasFinished()) {
+                return false;
+            }
         }
 
-        const now = this.timeline.getNow();
+        const now: Moment = this.timeline.getNow();
 
+        this.log.debug(`Now is ${now}`);
         // process current date events
-        const events = this.timeline.getEventsForNow();
+        const events: EventList = this.timeline.getEventsForNow();
         while (events.size() > 0) {
-            const event = events.dequeue();
+            const event: AnyEvent | undefined = events.dequeue();
 
             if (isUndefined(event)) {
                 break;
@@ -61,40 +73,64 @@ export class Simulation {
             const sensors = this.sensorsByEvent.getValue(event.name);
 
             sensors?.forEach(sensor => sensor.react(this.system, event)); // here new events can be added
-            // TODO: check reacting sensors
         }
-        // emit next events from streams
+        // here all the events from today are processed
 
+        // let's schedule new events
+        this.emitFromEventStreams();
 
-        // let evt: AnyEvent | undefined;
-        // do {
-        //     evt = this.timeline.getNextEvent();
-        //     this.log.debug(`Event: ${evt?.shortString()}`);
-        // } while (!isUndefined(evt));
+        return this.timeline.advance();
+    }
 
-        return true;
+    private emitFromEventStreams(): void {
+        const now = this.timeline.getNow();
+        for (const eventStream of this.eventStreams) {
+            this.log.debug(`Processing eventStream ${eventStream.image.name}.`);
+            const recurrence: IRecurrence = eventStream.recurrence;
+            const nextResult: RecurrenceNextResult = recurrence.next(false);
+
+            if (!nextResult.done) {
+                const currentDate: Moment | undefined = recurrence.getCurrent();
+                const nextDate: Moment | undefined = nextResult.date;
+
+                this.log.debug(`Now: ${now}, current: ${currentDate}, next: ${nextDate}`);
+                if (isUndefined(nextDate)) {
+                    throw new Error("Event stream not done, but date is undefined.");
+                }
+
+                if (currentDate === undefined || now.isBetween(currentDate, nextDate, "day", "[)")) {
+                    recurrence.next(true);
+                    const eventData: EventData = eventStream.image.emitter();
+                    const event: AnyEvent = new Event(nextDate, eventData);
+
+                    this.log.debug(`Emit new event for ${nextDate} from ${eventStream.image.name}.`);
+
+                    this.timeline.scheduleEvent(event);
+                }
+            }
+        }
     }
 
     private initializeEventStreams(): void {
         this.log.debug("Initializing event streams.");
-        const evStreamImages = this.system.getEventStreams();
+        const evStreamImages: Iterable<EventStreamImage> = this.system.getEventStreams();
 
         for (const evStreamImage of evStreamImages) {
-            const evStream = new EventStream(evStreamImage, this.params.startDate);
+            const evStream: EventStream = new EventStream(evStreamImage, this.params.startDate);
             this.eventStreams.push(evStream);
         }
     }
 
     private initalizeSensors(): void {
-        const sensorImages = this.system.getSensors();
+        const sensorImages: Iterable<AnySensorImage> = this.system.getSensors();
 
         this.log.debug("Initializing sensors.");
         for (const sensorImage of sensorImages) {
-            const sensor = new Sensor(sensorImage, this.params.startDate);
+            const sensor: AnySensor = new Sensor(sensorImage, this.params.startDate);
 
             for (const reacitonKey of sensor.image.reactions.keys()) {
                 // tODO: create list
-                this.sensorsByEvent.setValue(reacitonKey, [ sensor ]);
+                this.sensorsByEvent.setValue(reacitonKey, [sensor]);
             }
 
             this.sensors.push(sensor);
@@ -110,30 +146,17 @@ export class Simulation {
         this.initializeEventStreams();
         this.initalizeSensors();
 
-        for (const evStream of this.eventStreams) {
-            for (let index = 0; index < 3; index++) {
-                const res = evStream.recurrence.next();
-                if (res.done) {
-                    // TODO: remove from active streams
-                    break;
-                } else {
-                    const date = res.date;
-                    if (isUndefined(date)) {
-                        throw new Error("Date is null. What?");
-                    } else {
-                        const eventData = evStream.image.emitter();
-                        const evt = new Event(date, eventData);
-
-                        this.timeline.scheduleEvent(evt);
-                    }
-                }
-            }
-        }
+        this.emitFromEventStreams();
 
         this.log.debug("Starting stepping...");
-        let i = 0;
-        while (this.step()) {
+        let i: number = 1;
+        while (true) {
             this.log.debug(`Step ${i}`);
+            const stepResult: boolean = this.step();
+            if (stepResult === false) {
+                this.log.debug(`Finished stepping after ${i} steps`);
+                break;
+            }
             i++;
         }
 

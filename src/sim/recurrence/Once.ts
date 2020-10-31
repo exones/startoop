@@ -1,19 +1,15 @@
 import { Moment } from "moment";
-import { MomentUtils } from '../time/MomentUtils';
-import { IRecurrence } from './IRecurrence';
-import { OnceImage } from './OnceImage';
-import { Recurrence } from './Recurrence';
-import { RecurrenceNextResult } from './RecurrenceNextResult';
+import { MomentUtils } from "../time/MomentUtils";
+import { IRecurrence } from "./IRecurrence";
+import { OnceImage } from "./OnceImage";
+import { Recurrence } from "./Recurrence";
+import { RecurrenceNextResult } from "./RecurrenceNextResult";
 
 export class Once extends Recurrence<OnceImage> {
-    protected start(): void {
-        this.date = MomentUtils.offsetInputToDate(this.image.at, this.startDate);
-    }
-
-    next(): RecurrenceNextResult {
+    next(advance: boolean = false): RecurrenceNextResult {
         let result : RecurrenceNextResult = {
             done: this.done,
-            date: this.done ? undefined : this.date
+            date: this.done ? undefined : this.startDate
         };
         this.done = true;
 

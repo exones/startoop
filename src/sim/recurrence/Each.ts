@@ -1,4 +1,5 @@
 import { Moment } from "moment";
+import { isUndefined } from 'typescript-collections/dist/lib/util';
 import { MomentUtils } from '../time/MomentUtils';
 import { EachImage } from "./EachImage";
 import { IRecurrence } from "./IRecurrence";
@@ -37,25 +38,30 @@ class EachIterator extends RecurrenceIterator<EachImage> {
 }
 
 export class Each extends Recurrence<EachImage> {
-
     private first: boolean = true;
 
-    protected start(): void {
-        this.date = MomentUtils.offsetInputToDate(this.image.at, this.startDate);
-    }
-
-    next(): RecurrenceNextResult {
-
+    next(advance: boolean = true): RecurrenceNextResult {
+        let newDate: Moment | undefined = undefined;
         if (this.first) {
-            this.first = false;
+            if (advance) {
+                this.first = false;
+            }
+            newDate = this.startDate;
         } else {
-            this.date = this.date?.clone().add(this.image.period.amount, this.image.period.unit);
+            if (isUndefined(this.date)) {
+                throw new Error("Current date is undefined.");
+            }
+            newDate = this.date.clone().add(this.image.period.amount, this.image.period.unit);
         }
 
         let result : RecurrenceNextResult = {
             done: this.done,
-            date: this.done ? undefined : this.date
+            date: this.done ? undefined : newDate
         };
+
+        if (advance) {
+            this.date = newDate;
+        }
 
         return result;
     }
