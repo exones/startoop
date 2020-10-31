@@ -5,11 +5,11 @@ import { EventEmitter } from "./EventEmitter";
 import { IRecurrenceImage } from "../recurrence/IRecurrenceImage";
 import { Recurrences } from "../recurrence/Recurrences";
 import { SystemEntity } from "../SystemEntity";
-import { Offset } from '../time/Offset';
-import { MomentUtils } from '../time/MomentUtils';
+import { Offset } from "../time/Offset";
+import { MomentUtils } from "../time/MomentUtils";
 import { isPeriod, Period } from "../time/Period";
 import { isString } from "../util/StringUtils";
-import { OffsetInput } from '../time/OffsetInput';
+import { OffsetInput } from "../time/OffsetInput";
 
 export class EventStreamImage extends SystemEntity {
     recurrence: IRecurrenceImage = Recurrences.once();
@@ -18,7 +18,6 @@ export class EventStreamImage extends SystemEntity {
     emitter: EventEmitter<EventData> = () => { return <EventData>{}; };
 
     from(date: OffsetInput): EventStreamImage {
-
         if (isPeriod(date)) {
             this.startAt = date;
         } else {
@@ -52,7 +51,7 @@ export class EventStreamImage extends SystemEntity {
     }
 
     each(period: Period): EventStreamImage {
-        this.recurrence = Recurrences.each(period);
+        this.recurrence = Recurrences.each(period, this.startAt);
         return this;
     }
 

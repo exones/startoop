@@ -1,12 +1,13 @@
 
 import { Moment } from "moment";
-import { Offset } from '../time/Offset';
-import { OffsetInput } from '../time/OffsetInput';
-import { Period } from "../time/Period";
+import { MomentUtils } from '../time/MomentUtils';
+import { Offset } from "../time/Offset";
+import { OffsetInput } from "../time/OffsetInput";
+import { isPeriod, Period } from "../time/Period";
 import { Each } from "./Each";
 import { IRecurrence } from "./IRecurrence";
 import { IRecurrenceImage } from "./IRecurrenceImage";
-import { RecurrenceImage } from './RecurrenceImage';
+import { RecurrenceImage } from "./RecurrenceImage";
 
 
 export class EachImage implements RecurrenceImage<Each> {
@@ -19,7 +20,9 @@ export class EachImage implements RecurrenceImage<Each> {
     }
 
     start(date: Moment): Each {
-        return new Each(date, this);
+        const startDate = MomentUtils.offsetInputToDate(this.at, date);
+
+        return new Each(startDate, this);
     }
 }
 

@@ -1,7 +1,7 @@
 import { EarnEvent } from "@/sim/EarnEvent";
 import { Engine } from "@/sim/engine/Engine";
 import { SimulationParameters } from "@/sim/engine/SimulationParameters";
-import { SimulationResult } from '@/sim/engine/SimulationResult';
+import { SimulationResult } from "@/sim/engine/SimulationResult";
 import { Events } from "@/sim/event/Events";
 import { EventStreamImage } from "@/sim/event/EventStreamImage";
 import { SpendEvent } from "@/sim/SpendEvent";
@@ -18,8 +18,8 @@ describe("system", () => {
 
         const salary : EventStreamImage = sys
             .eventStream("salary")
-            .from((1).month())
-            .each((1).month())
+            .from((5).month())
+            .each((2).month())
             .emit(Events.spend(1000));
             // .then().after((1).year)
             // .emit(Events.spend(2000));
