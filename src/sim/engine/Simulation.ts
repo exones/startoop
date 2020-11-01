@@ -14,13 +14,14 @@ import { AnySensor } from "../sensor/AnySensor";
 import { StringDictionary } from "../util/StringDictionary";
 import { EventList } from "./EventList";
 import { AnyEvent } from "../event/AnyEvent";
-import { EventStreamImage } from '../event/EventStreamImage';
-import { SensorImage } from '../sensor/SensorImage';
-import { AnySensorImage } from '../sensor/AnySensorImage';
-import { RecurrenceNextResult } from '../recurrence/RecurrenceNextResult';
-import { EventData } from '../event/EventData';
-import { Recurrence } from '../recurrence/Recurrence';
-import { IRecurrence } from '../recurrence/IRecurrence';
+import { EventStreamImage } from "../event/EventStreamImage";
+import { SensorImage } from "../sensor/SensorImage";
+import { AnySensorImage } from "../sensor/AnySensorImage";
+import { RecurrenceNextResult } from "../recurrence/RecurrenceNextResult";
+import { EventData } from "../event/EventData";
+import { Recurrence } from "../recurrence/Recurrence";
+import { IRecurrence } from "../recurrence/IRecurrence";
+import { Set } from "typescript-collections";
 
 interface ActualSimulationParameters {
     startDate: Moment;
@@ -143,6 +144,7 @@ export class Simulation {
                 this.log.debug(`Sensor ${sensor.name} will react to ${eventName}.`);
                 sensorsList.push(sensor);
             }
+            this.sensors.push(sensor);
         }
     }
 
@@ -170,6 +172,45 @@ export class Simulation {
             i++;
         }
 
-        return new SimulationResult();
+        this.log.debug("Collecting simulation information...");
+
+        const dates = new Set<Moment>(x => MomentUtils.toIsoString(x));
+        const data: Array<Array<number>> = [];
+        const sensorNames: Array<string> = [];
+
+        for (const sensor of this.sensors) {
+            const sensorDates = sensor.timeSeries.getDates();
+
+            this.log.debug(`Sensor ${sensor.name}:`)
+            for (const date of sensorDates) {
+                dates.add(date);
+                this.log.debug(`${MomentUtils.toIsoString(date)}: ${sensor.timeSeries.dataAt(date).amount}`);
+            }
+
+            data.push([]);
+            sensorNames.push(sensor.name);
+        }
+
+        let allDates: Array<Moment> = dates.toArray();
+        allDates = allDates.sort((a, b) => {
+            if (a.isBefore(b)) {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
+
+        this.log.debug(`Dates: ${JSON.stringify(dates)}`);
+
+        for (let dateIndex: number = 0; dateIndex < allDates.length; dateIndex++) {
+            const date: Moment = allDates[dateIndex];
+
+            for (let sensorIndex: number = 0; sensorIndex < this.sensors.length; sensorIndex++) {
+                const sensor: AnySensor = this.sensors[sensorIndex];
+                data[sensorIndex].push(sensor.timeSeries.dataAt(date));
+            }
+        }
+
+        return new SimulationResult(sensorNames, allDates, data);
     }
 }

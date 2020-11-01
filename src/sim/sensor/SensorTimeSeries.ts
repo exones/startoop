@@ -18,9 +18,11 @@ export class SensorTimeSeries<TData> {
         this.dates = [];
     }
 
-    dataAt(date: Moment): TData {
-        const datum = this.data.getValue(date);
+    getDates(): Array<Moment> {
+        return this.dates;
+    }
 
+    dataAt(date: Moment): TData {
         if (date.isBefore(this.startDate)) {
             throw new Error("Can't get sensor data before the start date.");
         }
@@ -29,12 +31,26 @@ export class SensorTimeSeries<TData> {
             return this.initialData;
         }
 
-        if (isUndefined(datum)) {
-            let index: number = binarySearch(this.dates, x => x.isSame(date));
+        const datum = this.data.getValue(date);
 
-            if (index >= this.dates.length) { // now date found
-                index = this.dates.length - 1;
+        if (isUndefined(datum)) {
+            let index: number = binarySearch(this.dates, x => {
+                if (x.isSame(date)) {
+                    return 0;
+                }
+
+                if (x.isBefore(date)) {
+                    return 1;
+                }
+
+                return -1;
+            });
+
+
+            if (index < 0) {
+                throw new Error(`Date before beginning: ${MomentUtils.toIsoString(date)}, ${JSON.stringify(this.dates)}`);
             }
+
             const res = this.data.getValue(this.dates[index]);
 
             if (isUndefined(res)) {
@@ -52,8 +68,10 @@ export class SensorTimeSeries<TData> {
             throw new Error(`Trying to set the sensor data on ${MomentUtils.toIsoString(date)} before the latest known date ${MomentUtils.toIsoString(this.lastDate)}.`);
         }
 
+        if (isUndefined(this.data.getValue(date))) {
+            this.dates.push(date);
+        }
         this.data.setValue(date, data);
         this.lastDate = date;
-        this.dates.push(date);
     }
 }
