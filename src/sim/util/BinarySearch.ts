@@ -12,15 +12,19 @@ export function binarySearch<T>(array: Array<T>, pred: (elem: T) => number): num
 
     const log = newLogger();
 
+    if (max > 0 && pred(array[max]) >= 0) {
+        return max;
+    }
+
     while (min + 1 < max) {
         // tslint:disable-next-line:no-bitwise
         const mi: number = Math.floor((min + max) / 2);
 
-        const less = pred(array[mi]);
+        const cmp = pred(array[mi]);
 
-        if (less === 0) {
+        if (cmp === 0) {
             return mi;
-        } else if (less < 0) {
+        } else if (cmp < 0) {
             max = mi - 1;
         } else {
             min = mi;
