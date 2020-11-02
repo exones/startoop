@@ -22,6 +22,7 @@ import { EventData } from "../event/EventData";
 import { Recurrence } from "../recurrence/Recurrence";
 import { IRecurrence } from "../recurrence/IRecurrence";
 import { Set } from "typescript-collections";
+import { AmountData } from '../sensor/AmountData';
 
 interface ActualSimulationParameters {
     startDate: Moment;
@@ -38,7 +39,7 @@ export class Simulation {
     private sensorsByEvent: StringDictionary<Array<AnySensor>>;
     private currentDate: Moment = MomentUtils.now();
     private timeline: Timeline;
-    private first: boolean = true;
+    private first = true;
 
     constructor(system: SystemImage, params: SimulationParameters) {
         this.system = system;
@@ -207,7 +208,7 @@ export class Simulation {
 
             for (let sensorIndex: number = 0; sensorIndex < this.sensors.length; sensorIndex++) {
                 const sensor: AnySensor = this.sensors[sensorIndex];
-                data[sensorIndex].push(sensor.timeSeries.dataAt(date));
+                data[sensorIndex].push((sensor.timeSeries.dataAt(date) as AmountData).amount);
             }
         }
 

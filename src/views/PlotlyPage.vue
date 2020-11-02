@@ -14,11 +14,10 @@ import { Engine } from "@/sim/engine/Engine";
 import { SimulationParameters } from "@/sim/engine/SimulationParameters";
 import { SimulationResult } from "@/sim/engine/SimulationResult";
 import { newLogger } from '@/sim/log/LogRoot';
+import { AmountData } from "@/sim/sensor/AmountData";
 import { Logger } from "@/sim/log/Logger";
+import { MomentUtils } from '@/sim/time/MomentUtils';
 
-interface AmountData {
-  readonly amount: number;
-}
 
 @Component
 export default class PlotlyPage extends Vue {
@@ -34,14 +33,26 @@ export default class PlotlyPage extends Vue {
       .eventStream("salary")
       // .from((0).month())
       .each((1).month())
-      .emit(Events.spend(1000));
+      .emit(Events.spend(10000));
     // .then().after((1).year)
     // .emit(Events.spend(2000));
 
     sys
+      .eventStream("salary2")
+      .from((1).year())
+      .each((1).month())
+      .emit(Events.spend(10000));
+
+    sys
       .eventStream("SFIL")
-      .each((2).months())
-      .emit(Events.earn(4000));
+      .each((1).year())
+      .emit(Events.earn(60000));
+    
+    sys
+      .eventStream("SNCF")
+      .from((1).year())
+      .each((1).year())
+      .emit(Events.earn(100000));
 
     sys
       .sensor<AmountData>("balance")
@@ -82,27 +93,34 @@ export default class PlotlyPage extends Vue {
 
     const simParams: SimulationParameters = {
       startDate: "2021-01-01",
-      endDate: "2021-06-01"
+      endDate: "2025-01-01"
     };
 
-    const log = new Logger();
+    const result: SimulationResult = engine.simulate(sys, simParams);
 
+    console.log(result);
 
-    // const result: SimulationResult = engine.simulate(sys, simParams);
+    const x = result.dates.map(x => MomentUtils.toIsoString(x));
 
     Plotly.newPlot(
       this.$refs.bar as HTMLElement,
       [
         {
-          x: ["giraffes", "orangutans", "monkeys"],
-          y: [20, 14, 23],
-          name: "SF Zoo",
+          x,
+          y: result.data[0],
+          name: "balance",
+          type: "scatter"
+        },
+        {
+          x,
+          y: result.data[1],
+          name: "spendings",
           type: "bar"
         },
         {
-          x: ["giraffes", "orangutans", "monkeys"],
-          y: [12, 18, 29],
-          name: "LA Zoo",
+          x,
+          y: result.data[2],
+          name: "earnings",
           type: "bar"
         }
       ],
