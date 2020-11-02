@@ -21,12 +21,12 @@ export class Sensor<TData> extends SystemEntity {
         this.startDate = startDate;
 
         const initialData: TData = this.image.initalizer();
-        this.timeSeries = new SensorTimeSeries<TData>(startDate, initialData);
+        this.timeSeries = new SensorTimeSeries<TData>(startDate, initialData, this.image.style);
     }
 
     react(sys: SystemImage, evt: AnyEvent): TData | undefined {
-        const oldData = this.timeSeries.dataAt(evt.date);
-        const newData = this.image.reactions.getValue(evt.name)?.(sys, evt, oldData);
+        const oldData: TData = this.timeSeries.dataAt(evt.date);
+        const newData: TData | undefined = this.image.reactions.getValue(evt.name)?.(sys, evt, oldData);
 
         if (isUndefined(newData)) { // no reaction for this event
             this.log.warn(`Sensor ${this.name} doesn't have reaction for ${evt.name}.`);

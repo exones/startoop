@@ -32,14 +32,15 @@ describe("system", () => {
 
         sys
             .sensor<AmountData>("balance")
+            .cumulative()
             .init(() => { return { amount: 0 }; })
             .on<EarnEvent>(EarnEvent, (sys, evt, data) => {
-                return { ...data, amount: data.amount + evt.data.amount };
+                const newData = { ...data, amount: data.amount + evt.data.amount };
+
+                return newData;
             })
             .on<SpendEvent>(SpendEvent, (sys, evt, data) => {
                 const newData = { ...data, amount: data.amount - evt.data.amount };
-
-                log.debug(`New balance: ${newData.amount}`);
 
                 return newData;
             });

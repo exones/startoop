@@ -2,6 +2,7 @@ import { EventStreamImage } from './event/EventStreamImage';
 import { SystemEntity } from "./SystemEntity";
 import * as Collections from 'typescript-collections';
 import { SensorImage } from './sensor/SensorImage';
+import { SensorStyle } from './sensor/SensorTimeSeries';
 
 export class SystemImage extends SystemEntity {
     private eventStreams: Array<EventStreamImage> = [];
@@ -37,7 +38,7 @@ export class SystemImage extends SystemEntity {
     }
 
     sensor<TData>(name: string): SensorImage<TData> {
-        const sensorImage = new SensorImage<TData>(name);
+        const sensorImage = new SensorImage<TData>(name, SensorStyle.Impulse);
         this.sensors.push(sensorImage);
         this.addEntity(sensorImage);
 
