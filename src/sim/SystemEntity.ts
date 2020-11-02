@@ -1,4 +1,4 @@
-import { Logger } from 'tslog';
+import { Logger } from "@/sim/log/Logger";
 import { newLogger } from './log/LogRoot';
 import { INamed } from "./Named";
 

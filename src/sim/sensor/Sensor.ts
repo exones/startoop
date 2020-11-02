@@ -1,5 +1,5 @@
 import { Moment } from "moment";
-import { Logger } from "tslog";
+import { Logger } from "@/sim/log/Logger";
 import { isUndefined } from "typescript-collections/dist/lib/util";
 import { AnyEvent } from "../event/AnyEvent";
 import { newLogger } from "../log/LogRoot";

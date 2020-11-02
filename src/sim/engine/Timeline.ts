@@ -5,7 +5,7 @@ import { Event } from "../event/Event";
 import { AnyEvent } from "../event/AnyEvent";
 import { MomentUtils } from "../time/MomentUtils";
 import { newLogger } from "../log/LogRoot";
-import { Logger } from "tslog";
+import { Logger } from "@/sim/log/Logger";
 import { EventList } from "./EventList";
 
 export class Timeline {

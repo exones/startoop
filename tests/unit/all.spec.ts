@@ -35,28 +35,24 @@ describe("system", () => {
             .cumulative()
             .init(() => { return { amount: 0 }; })
             .on<EarnEvent>(EarnEvent, (sys, evt, data) => {
-                const newData = { ...data, amount: data.amount + evt.data.amount };
-
-                return newData;
+                return { ...data, amount: data.amount + evt.data.amount };
             })
             .on<SpendEvent>(SpendEvent, (sys, evt, data) => {
-                const newData = { ...data, amount: data.amount - evt.data.amount };
-
-                return newData;
+                return { ...data, amount: data.amount - evt.data.amount };
             });
 
         sys
             .sensor<AmountData>("spendings")
             .init(() => { return { amount: 0 }; })
             .on<SpendEvent>(SpendEvent, (sys, evt, data) => {
-                return { ...data, amount: data.amount - evt.data.amount };
+                return { amount: -evt.data.amount };
             });
 
         sys
             .sensor<AmountData>("earnings")
             .init(() => { return { amount: 0 }; })
             .on<EarnEvent>(EarnEvent, (sys, evt, data) => {
-                return { ...data, amount: data.amount + evt.data.amount };
+                return { amount: evt.data.amount };
             });
 
         const engine : Engine = new Engine();
@@ -68,6 +64,6 @@ describe("system", () => {
 
         const result : SimulationResult = engine.simulate(sys, simParams);
 
-        console.log(result);
+        console.log(JSON.stringify(result));
     });
 });

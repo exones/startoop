@@ -1,9 +1,5 @@
-import { Logger } from "tslog";
-
-export const LogRoot: Logger = new Logger({
-    overwriteConsole: true
-});
+import { Logger } from "./Logger";
 
 export function newLogger(): Logger {
-    return LogRoot;
+    return new Logger;
 }

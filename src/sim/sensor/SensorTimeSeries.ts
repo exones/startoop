@@ -1,7 +1,7 @@
 import { Moment } from "moment";
-import { Logger } from 'tslog';
+import { Logger } from "@/sim/log/Logger";
 import { isUndefined } from "typescript-collections/dist/lib/util";
-import { newLogger } from '../log/LogRoot';
+import { newLogger } from "../log/LogRoot";
 import { MomentDictionary } from "../time/MomentDictionary";
 import { MomentUtils } from "../time/MomentUtils";
 import { binarySearch } from "../util/BinarySearch";
@@ -64,8 +64,8 @@ export class SensorTimeSeries<TData> {
             case SensorStyle.Impulse:
                 return this.initialData;
 
-            case SensorStyle.Cumulative:
-                let index: number = binarySearch(this.dates, this.binarySearchComparator(date));
+            case SensorStyle.Cumulative: {
+                const index: number = binarySearch(this.dates, this.binarySearchComparator(date));
 
 
                 if (index < 0) {
@@ -81,6 +81,7 @@ export class SensorTimeSeries<TData> {
                 }
 
                 return res;
+            }
         }
     }
 

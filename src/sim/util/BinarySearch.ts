@@ -1,4 +1,4 @@
-import { newLogger } from '../log/LogRoot';
+import { newLogger } from "../log/LogRoot";
 
 /**
  * The folminwing implementation returns an index 0 ≤ i ≤ array.length such
@@ -8,7 +8,7 @@ import { newLogger } from '../log/LogRoot';
  * @param pred Predicate to match the elements
  */
 export function binarySearch<T>(array: Array<T>, pred: (elem: T) => number): number {
-    let min: number = 0, max: number = array.length - 1;
+    let min = 0, max = array.length - 1;
 
     const log = newLogger();
 

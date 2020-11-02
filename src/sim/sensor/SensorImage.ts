@@ -1,4 +1,4 @@
-import { Logger } from "tslog";
+import { Logger } from "@/sim/log/Logger";
 import { Dictionary } from "typescript-collections";
 import { EventData } from "../event/EventData";
 import { newLogger } from "../log/LogRoot";
@@ -9,7 +9,7 @@ import { SensorStyle } from "./SensorTimeSeries";
 
 export class SensorImage<TData> extends SystemEntity {
     private readonly log : Logger = newLogger();
-    initalizer: SensorInitializer<TData> = () => { return <TData>{}; };
+    initalizer: SensorInitializer<TData> = () => { return {} as TData; };
     reactions: Dictionary<string, SensorEventReaction<any, TData>> = new Dictionary<string, SensorEventReaction<any, TData>>();
     style: SensorStyle;
 
